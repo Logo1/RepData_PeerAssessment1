@@ -1,11 +1,6 @@
----
-title: 'Reproducible Research: Project Assignment 1'
-author: "Alessandro Spilotros"
-date: "10 gennaio 2016"
-output: 
-  html_document: 
-    keep_md: yes
----
+# Reproducible Research: Project Assignment 1
+Alessandro Spilotros  
+10 gennaio 2016  
 Abstract
 --------------
 This document presents the results from Project Assignment 1 in the Coursera course Reproducible Research. It was generated using R Markdown and generating a HTML file as output.
@@ -14,20 +9,57 @@ For the assignment we use data from a personal activity monitoring device which 
 
 Loading packages
 ---------------------------
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lubridate)
 library(ggplot2)
 ```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.2.3
+```
 Loading and tyding the data
 ---------------------------
-```{r}
+
+```r
 data <- read.csv("activity.csv", header = TRUE, sep = ',')
 ```
 Using lubridate package to convert the date into a date format in R
-```{r}
+
+```r
 data$date <- ymd(data$date)
 head(data)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 What is mean total number of steps taken per day?
 ---------------------------------------------------
@@ -38,25 +70,68 @@ For this part of the assignment, you can ignore the missing values in the datase
 3. Calculate and report the mean and median of the total number of steps taken per day
 
 Part 1.
-```{r}
+
+```r
 StepsPerDay <- data %>%
   filter(!is.na(steps)) %>%
   group_by(date) %>%
   summarize(steps = sum(steps))
 head(StepsPerDay)
 ```
+
+```
+## Source: local data frame [6 x 2]
+## 
+##         date steps
+##       (time) (int)
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
+```
 Part 2.
-```{r, echo=TRUE}
+
+```r
 hist(StepsPerDay$steps, 15, xlim =c(-1000,23000), ylim=c(-1,20), xlab = "Steps per day", ylab = "Frequency", main = "Histogram Steps per Day", col = 'green')
 ```
+
+![](RR-Pr1W1_files/figure-html/unnamed-chunk-5-1.png)\
 Part 3.
-```{r}
+
+```r
 mean_steps <- mean(StepsPerDay$steps, na.rm = TRUE)
 median_steps <- median(StepsPerDay$steps, na.rm = TRUE)
 print("mean steps=")
+```
+
+```
+## [1] "mean steps="
+```
+
+```r
 mean_steps
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 print("median steps=")
+```
+
+```
+## [1] "median steps="
+```
+
+```r
 median_steps
+```
+
+```
+## [1] 10765
 ```
 
 What is the average daily activity pattern?
@@ -65,20 +140,46 @@ What is the average daily activity pattern?
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 Part 1. 
-```{r}
+
+```r
 Interval <- data %>%
   filter(!is.na(steps)) %>%
   group_by(interval) %>%
   summarize(steps = mean(steps))
 head(Interval)
 ```
+
+```
+## Source: local data frame [6 x 2]
+## 
+##   interval     steps
+##      (int)     (dbl)
+## 1        0 1.7169811
+## 2        5 0.3396226
+## 3       10 0.1320755
+## 4       15 0.1509434
+## 5       20 0.0754717
+## 6       25 2.0943396
+```
 Part 2.
-```{r, echo=TRUE}
+
+```r
 plot(Interval$interval,Interval$steps,type = 'l', xlab = 'interval', ylab='steps', col='red')
 ```
+
+![](RR-Pr1W1_files/figure-html/unnamed-chunk-8-1.png)\
 which.max function finds the maximum steps on average across all days
-```{r, echo=TRUE}
+
+```r
 Interval[which.max(Interval$steps),]
+```
+
+```
+## Source: local data frame [1 x 2]
+## 
+##   interval    steps
+##      (int)    (dbl)
+## 1      835 206.1698
 ```
 The interval found is 835 with 206 steps.
 
@@ -93,36 +194,75 @@ Note that there are a number of days/intervals where there are missing values (c
 
 Part 1.
 finding the total number of missing values
-```{r, echo=TRUE}
+
+```r
 sum(is.na(data$steps))
+```
+
+```
+## [1] 2304
 ```
 Part 2-3.
 Strategy to fill in the missing values=replacing with the average over the 5 min interval.
-```{r, echo=TRUE}
+
+```r
 data2 <- data
 missing <- is.na(data2$steps)
 interval_avg <- tapply(data2$steps, data2$interval, mean, na.rm=TRUE, simplify=TRUE)
 data2$steps[missing] <- interval_avg[as.character(data2$interval[missing])]
 sum(is.na(data2$steps))
 ```
+
+```
+## [1] 0
+```
 Part 4.
 Calculating the number of steps taken in each 5-minute interval per day
-```{r, echo=TRUE}
+
+```r
 steps2 <- data2 %>%
   group_by(date) %>%
   summarize(steps = sum(steps))
 head(steps2)
-``` 
+```
+
+```
+## Source: local data frame [6 x 2]
+## 
+##         date    steps
+##       (time)    (dbl)
+## 1 2012-10-01 10766.19
+## 2 2012-10-02   126.00
+## 3 2012-10-03 11352.00
+## 4 2012-10-04 12116.00
+## 5 2012-10-05 13294.00
+## 6 2012-10-06 15420.00
+```
 Plotting the new histogram
-```{r, echo=TRUE}
+
+```r
 hist(steps2$steps, 15, xlim =c(-1000,23000), ylim=c(-1,25), xlab = "Steps per day", ylab = "Frequency", main = "Histogram Steps per Day (including missing values)", col = 'green')
 ```
+
+![](RR-Pr1W1_files/figure-html/unnamed-chunk-13-1.png)\
 Calculate the mean and median steps with the filled in values:
-```{r, echo=TRUE}
+
+```r
 mean_steps_2 <- mean(steps2$steps, na.rm = TRUE)
 median_steps_2 <- median(steps2$steps, na.rm = TRUE)
 mean_steps_2
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median_steps_2
+```
+
+```
+## [1] 10766.19
 ```
 
 Including the missing values the median and the mean are now both equal to 10766.19
@@ -135,13 +275,25 @@ For this part the weekdays() will come handy. Use the dataset with the filled-in
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 1. Using the function mutate of dplyr package it is possible to create the factor weektype
-```{r, echo=TRUE}
+
+```r
 data2 <- mutate(data2, weektype = ifelse(weekdays(data2$date) == "Saturday" | weekdays(data2$date) == "Sunday", "weekend", "weekday"))
 data2$weektype <- as.factor(data2$weektype)
 head(data2)
 ```
+
+```
+##       steps       date interval weektype
+## 1 1.7169811 2012-10-01        0  weekday
+## 2 0.3396226 2012-10-01        5  weekday
+## 3 0.1320755 2012-10-01       10  weekday
+## 4 0.1509434 2012-10-01       15  weekday
+## 5 0.0754717 2012-10-01       20  weekday
+## 6 2.0943396 2012-10-01       25  weekday
+```
 2. Calculating and plotting the average steps in the 5-minute interval and use ggplot for making the time series of the 5-minute interval for weekday and weekend
-```{r, echo=TRUE}
+
+```r
 interval2 <- data2 %>%
   group_by(interval, weektype) %>%
   summarise(steps = mean(steps))
@@ -149,3 +301,5 @@ interval2 <- data2 %>%
 p <- ggplot(interval2, aes(x=interval, y=steps, color = weektype)) + geom_line()+facet_wrap(~ weektype, ncol = 2, nrow=1)
 print(p)
 ```
+
+![](RR-Pr1W1_files/figure-html/unnamed-chunk-16-1.png)\
