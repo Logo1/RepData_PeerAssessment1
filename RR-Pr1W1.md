@@ -277,8 +277,31 @@ For this part the weekdays() will come handy. Use the dataset with the filled-in
 1. Using the function mutate of dplyr package it is possible to create the factor weektype
 
 ```r
-data2 <- mutate(data2, weektype = ifelse(weekdays(data2$date) == "Saturday" | weekdays(data2$date) == "Sunday", "weekend", "weekday"))
-data2$weektype <- as.factor(data2$weektype)
+weekendtest<-(weekdays(as.Date(data2$date))=="domenica"|weekdays(as.Date( data2$date))=="sabato")
+weektest<-(weekdays(as.Date(data2$date))!="domenica"&& weekdays(as.Date(data2$date))!="sabato")
+data2$weektype[weektest]<-"weekday"
+data2$weektype[weekendtest]<-"weekend"
+data2$weektype<-as.factor(data2$weektype)
+str(data2$weektype)
+```
+
+```
+##  Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+```r
+table(data2$weektype)
+```
+
+```
+## 
+## weekday weekend 
+##   12960    4608
+```
+
+```r
+data2 <- mutate(data2, weektype)
+#data2$weektype <- as.factor(data2$weektype)
 head(data2)
 ```
 
